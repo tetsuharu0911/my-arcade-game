@@ -9,7 +9,7 @@ pygame.init()
 screen_width = 800
 screen_height = 600
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Block Breaker Game")
+pygame.display.set_caption("Block Breaker Game - Paddle Collision")
 
 # --- Colors (RGB) ---
 WHITE = (255, 255, 255)
@@ -75,10 +75,15 @@ class Ball(pygame.sprite.Sprite):
         # Bounce off the top wall
         if self.rect.top <= 0:
             self.speed_y *= -1
-        # If ball hits bottom (lose condition, for now just bounce)
-        # We will handle losing a life later
+        # We will handle losing a life when ball hits bottom later
         if self.rect.bottom >= screen_height_param:
-            self.speed_y *= -1 # Temporary bounce, will be game over or lose life
+            # For now, let's reset the ball or make it bounce for testing
+            # self.speed_y *= -1 # Temporary bounce
+            # Reset ball to a position for testing (or implement game over)
+            self.rect.x = screen_width_param // 2
+            self.rect.y = screen_height_param // 2
+            self.speed_y = abs(self.speed_y) * random.choice([-1, 1]) # Randomize direction slightly
+            self.speed_x = abs(self.speed_x) * random.choice([-1, 1])
 
     def draw(self, surface):
         # Draw the ball onto the given surface
@@ -120,7 +125,18 @@ while running:
     # Game Logic
     ball.move()
     ball.bounce_walls(screen_width, screen_height)
-    # Collision detection between ball and paddle will be added here later
+    
+    # --- Ball and Paddle Collision Detection
+    # The 'colliderect' method checks if two Rect objects overlap
+    if paddle.rect.colliderect(ball.rect):
+        # Check if ball is moving downward (or towards the paddle top)
+        if ball.speed_y > 0:
+            ball.speed_y *= -1
+            
+            offset = (ball.rect.centerx - paddle.rect.centerx) / (paddle_width / 2)
+            ball.speed_x = offset * 5
+
+            ball.rect.bottom = paddle.rect.top
 
     # Drawing
     screen.fill(BLACK)  # Fill background
