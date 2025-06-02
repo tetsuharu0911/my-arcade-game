@@ -16,6 +16,12 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0) # Ball color
 PADDLE_COLOR = (0, 128, 128)
+BLOCK_COLORS = [
+    (0, 150, 0),  # Dark Green
+    (150, 150, 0), # Yellow-ish
+    (150, 0, 150), # Purple
+    (0, 150, 150)  # Cyan-ish
+]
 
 # --- Class Definitions ---
 class Paddle(pygame.sprite.Sprite):
@@ -89,20 +95,60 @@ class Ball(pygame.sprite.Sprite):
         # Draw the ball onto the given surface
         surface.blit(self.image, self.rect)
 
+class Block(pygame.sprite.Sprite):
+    def __init__(self, x, y, width, height, color):
+        super().__init__()
+        # Create the image of the block
+        self.image = pygame.Surface([width, height])
+        self.image.fill(color)
+        # Get the rectangle object that has the dimensions of the image
+        self.rect = self.image.get_rect()
+        # Set the position of the block
+        self.rect.x = x
+        self.rect.y = y
+
+    def draw(self, surface):
+        # Draw the block onto the given surface
+        surface.blit(self.image, self.rect)
+
 # --- Game Object Creation ---
+# Paddle
 paddle_width = 100
 paddle_height = 20
 paddle_x = (screen_width - paddle_width) // 2
 paddle_y = screen_height - paddle_height - 30
 paddle = Paddle(paddle_x, paddle_y, paddle_width, paddle_height, PADDLE_COLOR)
 
+# Ball
 ball_radius = 10
 ball_x = screen_width // 2
 ball_y = paddle_y - ball_radius - 5 # Start just above the paddle
-# Randomize initial ball direction
 ball_speed_x = random.choice([-5, 5])
 ball_speed_y = -5 # Move upwards initially
 ball = Ball(ball_x, ball_y, ball_radius, RED, ball_speed_x, ball_speed_y)
+
+# Block
+all_blocks = []
+block_width = 70
+block_height = 20
+block_padding = 10
+num_rows = 4
+num_cols = (screen_width - block_padding) // (block_width + block_padding)
+
+# Top-left corner for the block grid
+start_x = block_padding
+start_y = 50
+
+for row in range(num_rows):
+    for col in range(num_cols):
+        # Calculate x and y position for each block
+        block_x = start_x + col * (block_width + block_padding)
+        block_y = start_y + row * (block_height + block_padding)
+        # Choose a color based on the row
+        block_color = BLOCK_COLORS[row % len(BLOCK_COLORS)]
+        # Create a new block
+        block = Block(block_x, block_y, block_width, block_height, block_color)
+        all_blocks.append(block)
 
 # --- Game Loop Control ---
 clock = pygame.time.Clock()
@@ -143,6 +189,9 @@ while running:
     paddle.draw(screen) # Draw paddle
     ball.draw(screen)   # Draw ball
 
+    # Draw all the blocks
+    for block_item in all_blocks:
+        block_item.draw(screen)
     # Update Display
     pygame.display.flip()
 
