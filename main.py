@@ -9,7 +9,7 @@ pygame.init()
 screen_width = 800
 screen_height = 600
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Block Breaker Game - Paddle Collision")
+pygame.display.set_caption("Block Breaker Game - Block Collision")
 
 # --- Colors (RGB) ---
 WHITE = (255, 255, 255)
@@ -107,9 +107,9 @@ class Block(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
-    def draw(self, surface):
-        # Draw the block onto the given surface
-        surface.blit(self.image, self.rect)
+# --- Sprite Groups ---
+block_group = pygame.sprite.Group()
+
 
 # --- Game Object Creation ---
 # Paddle
@@ -148,7 +148,7 @@ for row in range(num_rows):
         block_color = BLOCK_COLORS[row % len(BLOCK_COLORS)]
         # Create a new block
         block = Block(block_x, block_y, block_width, block_height, block_color)
-        all_blocks.append(block)
+        block_group.add(block)
 
 # --- Game Loop Control ---
 clock = pygame.time.Clock()
@@ -183,6 +183,10 @@ while running:
             ball.speed_x = offset * 5
 
             ball.rect.bottom = paddle.rect.top
+    # --- Ball and Block Collision Detection ---
+    hit_blocks = pygame.sprite.spritecollide(ball, block_group, True)
+    if hit_blocks:
+        ball.speed_y *= -1
 
     # Drawing
     screen.fill(BLACK)  # Fill background
@@ -190,8 +194,8 @@ while running:
     ball.draw(screen)   # Draw ball
 
     # Draw all the blocks
-    for block_item in all_blocks:
-        block_item.draw(screen)
+    block_group.draw(screen)
+    
     # Update Display
     pygame.display.flip()
 
